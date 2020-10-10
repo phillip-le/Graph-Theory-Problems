@@ -16,7 +16,17 @@ public class ErdosNumbersTest {
             "Integers without large prime factors:Hildebrand, A.|Tenenbaum, G.",
             "Vertex‐distinguishing edge colorings of graphs:Balister, P. N.|Riordan, O. M.|Schelp, R. H."
     );
-    
+
+    @Test
+    public void testGraphImplementation() {
+        ErdosNumbers nums = new ErdosNumbers(List.of(
+                "Hello:Garry|Fred M.|Meet|Paul Erdös",
+                "Doc2:Rose|Garry|Meet",
+                "Doc3:Meet|Rose|Fred M."
+        ));
+        assertEquals(Set.of("Hello", "Doc2"), nums.getPapers("Garry"));
+    }
+
     @Test
     public void basicTest() {
         ErdosNumbers nums = new ErdosNumbers(SIMPLE_TEST_SET);
