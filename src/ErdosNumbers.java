@@ -6,7 +6,6 @@ public class ErdosNumbers {
      */
     public static final String ERDOS = "Paul Erdös";
 
-    private final double UNWEIGHTED = -1;
     private final double EPSILON = 1e-6;
 
     private static class Edge {
@@ -50,15 +49,22 @@ public class ErdosNumbers {
         // Stores the unweighted Erdos Number of each author
         private double[] unweightedDists;
 
+        // Stores the weighted Erdos Number of each author
+        private double[] weightedDists;
+
         // Maps each author to an index
         private Map<String, Integer> authorMapping;
 
         // Stores the vertices of the graph
         private List<List<Edge>> edges;
 
+        // Stores an edge list of the graph
+        private Map<String, List<String>> papers;
+
         private Graph() {
             numOfVertices = 0;
             authorMapping = new HashMap<>();
+            papers = new HashMap<>();
             edges = new ArrayList<>();
         }
 
@@ -101,6 +107,8 @@ public class ErdosNumbers {
         graph = new Graph();
         insertPapers(papers);
         graph.unweightedDists = calculateShortestPaths(false);
+        setWeights();
+        graph.weightedDists = calculateShortestPaths(true);
     }
 
     private void insertPapers(List<String> rawPapers) {
@@ -108,13 +116,14 @@ public class ErdosNumbers {
             String[] paper = rawPaper.split(":");
             String paperName = paper[0];
             String[] authors = paper[1].split("\\|");
+            graph.papers.put(paperName, List.of(authors));
             for (String author1 : authors) {
                 if (!graph.contains(author1)) {
                     graph.addAuthor(author1);
                 }
                 for (String author2 : authors) {
                     if (!author1.equals(author2)) {
-                        graph.addEdge(author1, author2, paperName, UNWEIGHTED);
+                        graph.addEdge(author1, author2, paperName, 1);
                     }
                 }
             }
@@ -129,7 +138,6 @@ public class ErdosNumbers {
      * @return the unique set of papers this author has written.
      */
     public Set<String> getPapers(String author) {
-        // TODO: implement this
         Set<String> papers = new HashSet<>();
         for (Edge e : graph.getEdges(author)) {
             papers.add(e.paper);
@@ -160,7 +168,6 @@ public class ErdosNumbers {
      * @return the connectivity of Erdos to all other authors.
      */
     public boolean isErdosConnectedToAll() {
-        // TODO: implement this
         for (double d : graph.unweightedDists) {
             if (Double.isInfinite(d)) {
                 return false;
@@ -184,7 +191,6 @@ public class ErdosNumbers {
      * @return authors' Erdos number or otherwise Integer.MAX_VALUE
      */
     public int calculateErdosNumber(String author) {
-        // TODO: implement this
         double dist = graph.unweightedDists[graph.authorMapping.get(author)];
         return Double.isInfinite(dist) ? Integer.MAX_VALUE : (int) dist;
     }
@@ -199,9 +205,11 @@ public class ErdosNumbers {
      * @return average Erdos number of paper's authors
      */
     public double averageErdosNumber(String paper) {
-        // TODO: implement this
-        
-        return 0;
+        double total = 0;
+        for (String author : graph.papers.get(paper)) {
+            total += graph.unweightedDists[graph.authorMapping.get(author)];
+        }
+        return total / graph.papers.get(paper).size();
     }
 
     /**
@@ -216,9 +224,8 @@ public class ErdosNumbers {
      * @return author's weighted Erdos number
      */
     public double calculateWeightedErdosNumber(String author) {
-        // TODO: implement this
-
-        return 0;
+        double dist = graph.weightedDists[graph.authorMapping.get(author)];
+        return Double.isInfinite(dist) ? Double.MAX_VALUE : dist;
     }
 
     private double[] calculateShortestPaths(boolean weighted) {
@@ -254,5 +261,21 @@ public class ErdosNumbers {
             }
         }
         return dists;
+    }
+
+    private void setWeights() {
+        for (String author : graph.authorMapping.keySet()) {
+            Map<String, Double> numOfCollabs = new HashMap<>();
+            for (Edge e: graph.getEdges(author)) {
+                if (!numOfCollabs.containsKey(e.to)) {
+                    numOfCollabs.put(e.to, 1.0);
+                } else {
+                    numOfCollabs.replace(e.to, numOfCollabs.get(e.to) + 1.0);
+                }
+            }
+            for (Edge e: graph.getEdges(author)) {
+                e.cost =  1 / numOfCollabs.get(e.to);
+            }
+        }
     }
 }
