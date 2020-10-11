@@ -1,13 +1,59 @@
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ContactTracer {
+
+    private static class Edge {
+        private String to;
+        private int time;
+
+        private Edge(String to, int time) {
+            this.to = to;
+            this.time = time;
+        }
+    }
+
+    private static class Graph {
+        private List<PriorityQueue<Edge>> edges;
+        private Map<String, Integer> personMapping;
+        // Number of vertices
+        private int n;
+
+        private Graph() {
+            edges = new ArrayList<>();
+            personMapping = new HashMap<>();
+            n = 0;
+        }
+
+        private void addVertex(String personA) {
+            edges.add(new PriorityQueue<>(new Comparator<Edge>() {
+                @Override
+                public int compare(Edge e1, Edge e2) {
+                    return e1.time - e2.time;
+                }
+            }));
+            personMapping.put(personA, n++);
+        }
+
+        private void addEdge(String from, String to, int time) {
+            getEdges(from).add(new Edge(to, time));
+        }
+
+        private PriorityQueue<Edge> getEdges(String from) {
+            return edges.get(personMapping.get(from));
+        }
+
+        private int getPersonIdx(String person) {
+            return personMapping.get(person);
+        }
+    }
+
+    private Graph graph;
 
     /**
      * Initialises an empty ContactTracer with no populated contact traces.
      */
     public ContactTracer() {
-        // TODO: implement this!
+        graph = new Graph();
     }
 
     /**
@@ -19,6 +65,9 @@ public class ContactTracer {
      */
     public ContactTracer(List<Trace> traces) {
         // TODO: implement this!
+        for (Trace trace : traces) {
+            addTrace(trace);
+        }
     }
 
     /**
@@ -32,6 +81,14 @@ public class ContactTracer {
      */
     public void addTrace(Trace trace) {
         // TODO: implement this!
+        if (!graph.personMapping.containsKey(trace.getPerson1())) {
+            graph.addVertex(trace.getPerson1());
+        }
+        if (!graph.personMapping.containsKey(trace.getPerson2())) {
+            graph.addVertex(trace.getPerson2());
+        }
+        graph.addEdge(trace.getPerson1(), trace.getPerson2(), trace.getTime());
+        graph.addEdge(trace.getPerson2(), trace.getPerson1(), trace.getTime());
     }
 
     /**
@@ -49,8 +106,13 @@ public class ContactTracer {
      */
     public List<Integer> getContactTimes(String person1, String person2) {
         // TODO: implement this!
-        
-        return null;
+        List<Integer> contactTimes = new ArrayList<>();
+        for (Edge e : graph.getEdges(person1)) {
+            if (e.to.equals(person2)) {
+                contactTimes.add(e.time);
+            }
+        }
+        return contactTimes;
     }
 
     /**
@@ -62,8 +124,11 @@ public class ContactTracer {
      */
     public Set<String> getContacts(String person) {
         // TODO: implement this!
-        
-        return null;
+        Set<String> contacts = new HashSet<>();
+        for (Edge e : graph.getEdges(person)) {
+            contacts.add(e.to);
+        }
+        return contacts;
     }
 
     /**
@@ -76,8 +141,13 @@ public class ContactTracer {
      */
     public Set<String> getContactsAfter(String person, int timestamp) {
         // TODO: implement this!
-        
-        return null;
+        Set<String> contacts = new HashSet<>();
+        for (Edge e : graph.getEdges(person)) {
+            if (e.time >= timestamp) {
+                contacts.add(e.to);
+            }
+        }
+        return contacts;
     }
 
     /**
@@ -92,7 +162,23 @@ public class ContactTracer {
      */
     public Set<String> contactTrace(String person, int timeOfContagion) {
         // TODO: implement this!
-        
-        return null;
+        boolean[] visited = new boolean[graph.n];
+        Set<String> infected = new HashSet<>();
+        bfs(person, visited, infected, timeOfContagion);
+        infected.remove(person);
+        return infected;
+    }
+
+    private void bfs(String current, boolean[] visited, Set<String> infected, int time) {
+        if (visited[graph.getPersonIdx(current)]) {
+            return;
+        }
+        visited[graph.getPersonIdx(current)] = true;
+        infected.add(current);
+        for (Edge e : graph.getEdges(current)) {
+            if (e.time >= time) {
+                bfs(e.to, visited, infected, e.time + 60);
+            }
+        }
     }
 }

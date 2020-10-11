@@ -4,7 +4,12 @@ import java.util.List;
 import org.junit.Test;
 
 public class FactCheckerTest {
-    
+
+    @Test
+    public void testCycleDFS() {
+
+    }
+
     @Test
     public void testSimpleInconsistent() {
         List<Fact> facts = List.of(
