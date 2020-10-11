@@ -4,10 +4,11 @@ public class FactChecker {
 
     private static class Edge {
         private String from, to;
-
-        private Edge(String from, String to) {
+        private Fact.FactType factType;
+        private Edge(String from, String to, Fact.FactType factType) {
             this.from = from;
             this.to = to;
+            this.factType = factType;
         }
     }
 
@@ -28,8 +29,9 @@ public class FactChecker {
             personMapping.put(personA, n++);
         }
 
-        private void addEdge(String personA, String personB) {
-            getEdges(personA).add(new Edge(personA, personB));
+        private void addEdge(String personA, String personB,
+                Fact.FactType factType) {
+            getEdges(personA).add(new Edge(personA, personB, factType));
         }
 
         private List<Edge> getEdges(String from) {
@@ -65,18 +67,19 @@ public class FactChecker {
         if (!graph.personMapping.containsKey(fact.getPersonB())) {
             graph.addVertex(fact.getPersonB());
         }
-        graph.addEdge(fact.getPersonA(), fact.getPersonB());
+        graph.addEdge(fact.getPersonA(), fact.getPersonB(), fact.getType());
         if (fact.getType() == Fact.FactType.TYPE_TWO) {
-            graph.addEdge(fact.getPersonB(), fact.getPersonA());
+            graph.addEdge(fact.getPersonB(), fact.getPersonA(), fact.getType());
         }
     }
 
     private static boolean cycleDFS(Graph graph) {
         boolean[] visited = new boolean[graph.n];
-        Stack<Integer> path = new Stack<>();
+        boolean[] exploring = new boolean[graph.n];
+        Stack<Edge> path = new Stack<>();
         for (int i = 0; i < graph.n; i++) {
             if (!visited[i]) {
-                if (dfs(graph, i, visited, path)) {
+                if (dfs(graph, i, visited, path, exploring)) {
                     return true;
                 }
             }
@@ -84,23 +87,32 @@ public class FactChecker {
         return false;
     }
 
-    private static boolean dfs(Graph graph, int current, boolean[] visited, Stack<Integer> path) {
-        if (path.contains(current)) {
+    private static boolean dfs(Graph graph, int current, boolean[] visited, Stack<Edge> pathEdges, boolean[] exploring) {
+        if (exploring[current]) {
             // Check if it is a cycle between two vertices
-            return path.get(path.size() - 2) != current;
+            Edge secondLastEdge = pathEdges.get(pathEdges.size() - 2);
+            return !typeTwoEdge(pathEdges.peek(), secondLastEdge);
         }
         if (visited[current]) {
             return false;
         }
-        path.push(current);
         visited[current] = true;
+        exploring[current] = true;
         for (Edge e : graph.edges.get(current)) {
             int next = graph.getPersonIdx(e.to);
-            if (dfs(graph, next, visited, path)) {
+            pathEdges.push(e);
+            if (dfs(graph, next, visited, pathEdges, exploring)) {
                 return true;
             }
+            pathEdges.pop();
         }
-        path.pop();
+        exploring[current] = false;
         return false;
+    }
+
+    private static boolean typeTwoEdge(Edge e1, Edge e2) {
+        return e1.factType == Fact.FactType.TYPE_TWO &&
+                e2.factType == Fact.FactType.TYPE_TWO &&
+                e1.from.equals(e2.to) && e2.from.equals(e1.to);
     }
 }
