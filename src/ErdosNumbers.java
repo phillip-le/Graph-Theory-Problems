@@ -235,7 +235,6 @@ public class ErdosNumbers {
         dists[graph.authorMapping.get(ERDOS)] = 0;
 
         boolean[] visited = new boolean[graph.numOfVertices];
-        Arrays.fill(visited, false);
         PriorityQueue<Node> pq = new PriorityQueue<>(graph.numOfVertices,
                 new NodeComparator());
         pq.add(new Node(graph.authorMapping.get(ERDOS), 0));
