@@ -1,5 +1,6 @@
 import static org.junit.Assert.*;
 
+import java.nio.file.FileAlreadyExistsException;
 import java.util.List;
 import org.junit.Test;
 
@@ -55,5 +56,15 @@ public class FactCheckerTest {
         );
 
         assertFalse(FactChecker.areFactsConsistent(facts));
+    }
+
+    @Test
+    public void testAllSameTime() {
+        List<Fact> facts = List.of(
+                new Fact(Fact.FactType.TYPE_TWO, "A", "B"),
+                new Fact(Fact.FactType.TYPE_TWO, "B", "C"),
+                new Fact(Fact.FactType.TYPE_TWO, "C", "A")
+        );
+        assertTrue(FactChecker.areFactsConsistent(facts));
     }
 }
