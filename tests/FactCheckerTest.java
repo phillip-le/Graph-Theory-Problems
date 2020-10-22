@@ -67,4 +67,14 @@ public class FactCheckerTest {
         );
         assertTrue(FactChecker.areFactsConsistent(facts));
     }
+
+    @Test
+    public void testNotAllSameTime() {
+        List<Fact> facts = List.of(
+                new Fact(Fact.FactType.TYPE_ONE, "Sanni", "Matt"),
+                new Fact(Fact.FactType.TYPE_TWO, "Matt", "Max"),
+                new Fact(Fact.FactType.TYPE_TWO, "Max", "Sanni")
+        );
+        assertTrue(FactChecker.areFactsConsistent(facts));
+    }
 }
