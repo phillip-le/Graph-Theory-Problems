@@ -9,11 +9,22 @@ public class ErdosNumbers {
     // Threshold for double equality check
     private final double EPSILON = 1e-6;
 
-
+    /**
+     * Represents a paper that two authors have collaborated on as an edge
+     */
     private static class Edge {
+        // Stores an author and the paper that was collaborated
         private String to, paper;
+
+        // Stores the Erdos Weighting
         private double cost;
 
+        /**
+         * Edge constructor.
+         * @param to - the person that was collaborated with
+         * @param paper - the name of the paper
+         * @param cost - the Erdos Weighting
+         */
         private Edge(String to, String paper, double cost) {
             this.to = to;
             this.paper = paper;
@@ -21,16 +32,30 @@ public class ErdosNumbers {
         }
     }
 
+    /**
+     * Node for Dijkstra's Algorithm
+     */
     private static class Node {
+        // Index of the person
         private int key;
+
+        // Cost of path
         private double value;
 
+        /**
+         * Node constructor.
+         * @param key - the index of the person.
+         * @param value - the cost of the current path.
+         */
         private Node(int key, double value) {
             this.key = key;
             this.value = value;
         }
     }
 
+    /**
+     * Compares two nodes based on the node.value
+     */
     private class NodeComparator implements Comparator<Node> {
         @Override
         public int compare(Node x, Node y) {

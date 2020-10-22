@@ -37,23 +37,41 @@ public class FactChecker {
         }
 
         /**
-         *
-         * @param personA
+         * Adds person to graph.
+         * @param personA - the person to add
          */
         private void addVertex(String personA) {
             edges.add(new ArrayList<>());
             personMapping.put(personA, n++);
         }
 
+        /**
+         * Adds timing to graph.
+         * @param personA - first person
+         * @param personB - second person
+         * @param factType - the type of fact
+         */
         private void addEdge(String personA, String personB,
                 Fact.FactType factType) {
             getEdges(personA).add(new Edge(personB, factType));
         }
 
+        /**
+         * Gets the people who were at the party at the same time as from or
+         * left after from.
+         * @param from - the person to get the edges of.
+         * @return the people who were at the party at the same time as from or
+         * left after from.
+         */
         private List<Edge> getEdges(String from) {
             return edges.get(personMapping.get(from));
         }
 
+        /**
+         * Gets the index of person.
+         * @param person the person to get the index of.
+         * @return the index of person.
+         */
         private int getPersonIdx(String person) {
             return personMapping.get(person);
         }
@@ -76,6 +94,11 @@ public class FactChecker {
         return !cycleDFS(graph);
     }
 
+    /**
+     * Inserts fact into graph.
+     * @param graph - the graph to insert fact into.
+     * @param fact - the fact to insert.
+     */
     private static void insertFact(Graph graph, Fact fact) {
         if (!graph.personMapping.containsKey(fact.getPersonA())) {
             graph.addVertex(fact.getPersonA());
@@ -83,12 +106,19 @@ public class FactChecker {
         if (!graph.personMapping.containsKey(fact.getPersonB())) {
             graph.addVertex(fact.getPersonB());
         }
+
+        // Type two facts are treated are inserted as unweighted edges
         graph.addEdge(fact.getPersonA(), fact.getPersonB(), fact.getType());
         if (fact.getType() == Fact.FactType.TYPE_TWO) {
             graph.addEdge(fact.getPersonB(), fact.getPersonA(), fact.getType());
         }
     }
 
+    /**
+     * Determine if there is an invalid cycle in the graph.
+     * @param graph the graph to search.
+     * @return true if there is an invalid cycle, else false.
+     */
     private static boolean cycleDFS(Graph graph) {
         boolean[] visited = new boolean[graph.n];
         boolean[] exploring = new boolean[graph.n];
@@ -103,7 +133,18 @@ public class FactChecker {
         return false;
     }
 
-    private static boolean dfs(Graph graph, int current, boolean[] visited, Stack<Edge> pathEdges, boolean[] exploring) {
+    /**
+     * Conducts depth first search on graph to determine if there is an invalid
+     * cycle.
+     * @param graph - the graph to search.
+     * @param current - the index of the current person
+     * @param visited - the people who have been seen so far
+     * @param pathEdges - the edges of the current path
+     * @param exploring - tracks who has been searched in the current path
+     * @return true if there is an invalid cycle, else false.
+     */
+    private static boolean dfs(Graph graph, int current, boolean[] visited,
+            Stack<Edge> pathEdges, boolean[] exploring) {
         if (exploring[current]) {
             // Check if it is a cycle between two vertices
             Edge secondLastEdge = pathEdges.get(pathEdges.size() - 2);
@@ -126,9 +167,14 @@ public class FactChecker {
         return false;
     }
 
+    /**
+     * Checks if the two edges are FactType Two.
+     * @param e1 first edge
+     * @param e2 second edge
+     * @return true if the two edges are FactType Two, else false.
+     */
     private static boolean typeTwoEdge(Edge e1, Edge e2) {
         return e1.factType == Fact.FactType.TYPE_TWO &&
-                e2.factType == Fact.FactType.TYPE_TWO;// &&
-//                e1.from.equals(e2.to) && e2.from.equals(e1.to);
+                e2.factType == Fact.FactType.TYPE_TWO;
     }
 }
