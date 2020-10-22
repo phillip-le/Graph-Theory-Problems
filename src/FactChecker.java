@@ -2,28 +2,44 @@ import java.util.*;
 
 public class FactChecker {
 
+    /**
+     * Represents timing between two people as edge
+     */
     private static class Edge {
-        private String from, to;
+        private String to;
         private Fact.FactType factType;
-        private Edge(String from, String to, Fact.FactType factType) {
-            this.from = from;
+        private Edge(String to, Fact.FactType factType) {
             this.to = to;
             this.factType = factType;
         }
     }
 
+    /**
+     * Represents the timing of people at the party as graph
+     */
     private static class Graph {
+        // Stores the timing between people
         private List<List<Edge>> edges;
+
+        // Maps person to index
         private Map<String, Integer> personMapping;
-        // Number of vertices
+
+        // Number of people
         private int n;
 
+        /**
+         * Graph Constructor
+         */
         private Graph() {
             edges = new ArrayList<>();
             personMapping = new HashMap<>();
             n = 0;
         }
 
+        /**
+         *
+         * @param personA
+         */
         private void addVertex(String personA) {
             edges.add(new ArrayList<>());
             personMapping.put(personA, n++);
@@ -31,7 +47,7 @@ public class FactChecker {
 
         private void addEdge(String personA, String personB,
                 Fact.FactType factType) {
-            getEdges(personA).add(new Edge(personA, personB, factType));
+            getEdges(personA).add(new Edge(personB, factType));
         }
 
         private List<Edge> getEdges(String from) {
@@ -112,7 +128,7 @@ public class FactChecker {
 
     private static boolean typeTwoEdge(Edge e1, Edge e2) {
         return e1.factType == Fact.FactType.TYPE_TWO &&
-                e2.factType == Fact.FactType.TYPE_TWO &&
-                e1.from.equals(e2.to) && e2.from.equals(e1.to);
+                e2.factType == Fact.FactType.TYPE_TWO;// &&
+//                e1.from.equals(e2.to) && e2.from.equals(e1.to);
     }
 }

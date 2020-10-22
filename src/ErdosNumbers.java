@@ -6,14 +6,15 @@ public class ErdosNumbers {
      */
     public static final String ERDOS = "Paul Erdös";
 
+    // Threshold for double equality check
     private final double EPSILON = 1e-6;
 
+
     private static class Edge {
-        private String from, to, paper;
+        private String to, paper;
         private double cost;
 
-        private Edge(String from, String to, String paper, double cost) {
-            this.from = from;
+        private Edge(String to, String paper, double cost) {
             this.to = to;
             this.paper = paper;
             this.cost = cost;
@@ -43,7 +44,11 @@ public class ErdosNumbers {
         }
     }
 
+    /**
+     * Representation of Erdos' relationships as graph
+     */
     private static class Graph {
+        // Number of people
         private int numOfVertices;
 
         // Stores the unweighted Erdos Number of each author
@@ -61,6 +66,9 @@ public class ErdosNumbers {
         // Stores an edge list of the graph
         private Map<String, List<String>> papers;
 
+        /**
+         * Graph Constructor
+         */
         private Graph() {
             numOfVertices = 0;
             authorMapping = new HashMap<>();
@@ -68,21 +76,41 @@ public class ErdosNumbers {
             edges = new ArrayList<>();
         }
 
+        /**
+         * Adds author to graph as vertex
+         * @param author the author to add
+         */
         private void addAuthor(String author) {
             authorMapping.put(author, numOfVertices++);
             edges.add(new ArrayList<>());
         }
 
+        /**
+         * Adds relationship between authors as edge
+         * @param from first author
+         * @param to second author
+         * @param paper the paper that they collaborated on
+         * @param cost the Erdos weighting
+         */
         private void addEdge(String from, String to, String paper,
                 double cost) {
-            getEdges(from).add(new Edge(from, to, paper,
-                    cost));
+            getEdges(from).add(new Edge(to, paper, cost));
         }
 
+        /**
+         * Gets the people who have collaborated with a specified person
+         * @param from the person they have collaborated with
+         * @return the people who have collaborated with a specified person
+         */
         private List<Edge> getEdges(String from) {
             return edges.get(authorMapping.get(from));
         }
 
+        /**
+         * Checks if the author is in the graph.
+         * @param author the author to check.
+         * @return true if the author is in the graph, else false.
+         */
         private boolean contains(String author) {
             return authorMapping.containsKey(author);
         }
@@ -111,6 +139,10 @@ public class ErdosNumbers {
         graph.weightedDists = calculateShortestPaths(true);
     }
 
+    /**
+     * Inserts the papers into the graph
+     * @param rawPapers the raw papers to process
+     */
     private void insertPapers(List<String> rawPapers) {
         for (String rawPaper : rawPapers) {
             String[] paper = rawPaper.split(":");
@@ -228,6 +260,11 @@ public class ErdosNumbers {
         return Double.isInfinite(dist) ? Double.MAX_VALUE : dist;
     }
 
+    /**
+     * Conducts Dijkstra's algorithm to compute shortest distances
+     * @param weighted - determines whether or not weighting is used
+     * @return array of Erdos numbers
+     */
     private double[] calculateShortestPaths(boolean weighted) {
         double[] dists = new double[graph.numOfVertices];
         Arrays.fill(dists, Double.POSITIVE_INFINITY);
@@ -262,6 +299,9 @@ public class ErdosNumbers {
         return dists;
     }
 
+    /**
+     * Sets the weights of each edge
+     */
     private void setWeights() {
         for (String author : graph.authorMapping.keySet()) {
             Map<String, Double> numOfCollabs = new HashMap<>();

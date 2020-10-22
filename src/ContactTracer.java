@@ -2,28 +2,53 @@ import java.util.*;
 
 public class ContactTracer {
 
+    /**
+     * Representation of relationship between people as Edge
+     */
     private static class Edge {
+        // The other person in contact
         private String to;
+
+        // The time when they had contact
         private int time;
 
+        /**
+         * Edge Constructor
+         * @param to - the other person they had in contact
+         * @param time - the time when they had contact
+         */
         private Edge(String to, int time) {
             this.to = to;
             this.time = time;
         }
     }
 
+    /**
+     * Representation of Contacts as Graph
+     */
     private static class Graph {
+        // Stores list of people that a person has been in contact with
         private List<PriorityQueue<Edge>> edges;
+
+        // Stores the mapping from person to index
         private Map<String, Integer> personMapping;
-        // Number of vertices
+
+        // Number of people
         private int n;
 
+        /**
+         * Graph constructor.
+         */
         private Graph() {
             edges = new ArrayList<>();
             personMapping = new HashMap<>();
             n = 0;
         }
 
+        /**
+         * Adds a person to the graph
+         * @param personA - the person to add
+         */
         private void addVertex(String personA) {
             edges.add(new PriorityQueue<>(new Comparator<Edge>() {
                 @Override
@@ -34,19 +59,36 @@ public class ContactTracer {
             personMapping.put(personA, n++);
         }
 
+        /**
+         * Adds a contact edge between two people at a certain time
+         * @param from first person
+         * @param to second person
+         * @param time that they met
+         */
         private void addEdge(String from, String to, int time) {
             getEdges(from).add(new Edge(to, time));
         }
 
+        /**
+         * Gets the people that the person has been in contact with
+         * @param from the person to get contacts
+         * @return the people that the person has been in contact with
+         */
         private PriorityQueue<Edge> getEdges(String from) {
             return edges.get(personMapping.get(from));
         }
 
+        /**
+         * Gets the index of the person
+         * @param person the person to get the index of
+         * @return the index of the person
+         */
         private int getPersonIdx(String person) {
             return personMapping.get(person);
         }
     }
 
+    // Stores the graph
     private Graph graph;
 
     /**
@@ -169,7 +211,15 @@ public class ContactTracer {
         return infected;
     }
 
-    private void bfs(String current, boolean[] visited, Set<String> infected, int time) {
+    /**
+     * Conducts a breadth first search that adds people
+     * @param current the current person to search
+     * @param visited tracks who has been searched so far
+     * @param infected the people who have been infected
+     * @param time the time that the original person was contagious
+     */
+    private void bfs(String current, boolean[] visited, Set<String> infected,
+            int time) {
         if (visited[graph.getPersonIdx(current)]) {
             return;
         }
